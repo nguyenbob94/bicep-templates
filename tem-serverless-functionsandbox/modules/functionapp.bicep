@@ -76,3 +76,30 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
     httpsOnly: true
   }
 }
+
+resource function 'Microsoft.Web/sites/functions@2022-03-01' = {
+  name: '${functionApp.name}/HTTPTimerTrigger'
+  properties: {
+    config: {
+      disabled: false
+      bindings: [
+        {
+          name: 'HTTPTimerTrigger'
+          type: 'timerTrigger'
+          direction: 'in'
+          schedule: '0/15 * * * * *'
+        }
+        {
+          name: 'TestBlobDump'
+          direction: 'out'
+          type: 'blob'
+          path: 'somerandomguy/pilotdetails.json'
+          connection: 'AzureWebJobsStorage'
+        }
+      ]
+    }
+    files: {
+      'run.ps1': loadTextContent('../appscripts/HTTPGETDump/run.ps1')
+    }
+  }
+}
